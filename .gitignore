@@ -14,8 +14,9 @@ dev-dist
 *.local
 .env
 .env.*
+!.env.example
 .dev.vars*
-.wrangler/.
+.wrangler/
 
 # Editor directories and files
 .vscode/*

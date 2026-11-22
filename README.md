@@ -1,5 +1,44 @@
-# Vue 3 + Vite
+# TaskFlow
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Навчальний PWA-застосунок на Vue 3, Framework7 та Vite. Головна сторінка містить чотири тестові завдання зі статусами й пріоритетами та обчислюваний показник виконання. Окрема сторінка описує технології застосунку.
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## Запуск
+
+```sh
+npm ci
+npm run dev
+```
+
+## Збірка та публікація
+
+```sh
+npm run generate:icons
+npm run build
+npm run preview
+```
+
+Cloudflare Worker `taskflow-demo` збирає гілку `main` командами `npm run build` і `npx wrangler deploy`. Корінь репозиторію `/`, каталог статичних файлів `dist`. `dist` і `node_modules` не потрібно додавати до Git. Для ручного деплою з авторизованим Wrangler: `npm run deploy`.
+
+## Структура
+
+```text
+src/
+  main.js                 # Vue, Framework7, реєстрація Service Worker
+  App.vue                 # Кореневий компонент і головне представлення
+  routes.js               # Маршрути / та /about/
+  components/TaskCard.vue  # Картка одного завдання
+  pages/HomePage.vue      # Список і показник виконання
+  pages/AboutPage.vue     # Опис застосунку
+  data/tasks.js           # Тестові дані
+  css/app.css             # Адаптивні стилі
+public/icons/             # SVG, PNG 192/512 та окрема maskable-іконка
+scripts/generate-icons.mjs # Генерація PNG через sharp
+vite.config.js            # Vue, Web App Manifest, Workbox
+wrangler.jsonc            # Cloudflare Workers Static Assets
+```
+
+## Перевірка PWA
+
+Відкрити production-версію на HTTPS або локальний `npm run preview`. У Chrome DevTools → Application перевірити Manifest та активний Service Worker. Після першого завантаження увімкнути Offline та перезавантажити сторінку. Кеш містить обидві сторінки й ресурси застосунку. Встановлення доступне через меню Chrome «Установити TaskFlow».
+
+Дані є демонстраційними відповідно до завдання. Додавання, редагування й збереження завдань не реалізовані.
