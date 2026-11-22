@@ -2,7 +2,6 @@
 import { ref, computed } from 'vue';
 import AppTabbar from '../components/AppTabbar.vue';
 import TaskCard from '../components/TaskCard.vue';
-import TaskCounter from '../components/TaskCounter.vue';
 import { taskState, setTaskStatus, setTaskPriority } from '../store/tasks.js';
 import '../css/task-components.css';
 
@@ -27,7 +26,7 @@ function handlePriorityChange(payload) { setTaskPriority(payload); }
 <template>
   <f7-page name="tasks" class="tf3-page">
     <f7-navbar title="Мої завдання" />
-    <main class="tf3-container">
+    <div class="tf3-container">
       <section class="tf3-hero">
         <div class="tf3-eyebrow">TASKFLOW / TASK MANAGER</div><h1>Мої завдання</h1>
         <p>Керуйте завданнями, статусами та пріоритетами.</p>
@@ -49,14 +48,14 @@ function handlePriorityChange(payload) { setTaskPriority(payload); }
       <section class="tf3-section">
         <div class="tf3-section-heading">
           <div><div class="tf3-eyebrow">TASK LIST</div><h2>Список завдань</h2></div>
-          <TaskCounter :count="filteredTasks.length" />
+          <div class="tf3-counter">Знайдено: {{ filteredTasks.length }}</div>
         </div>
         <div v-if="filteredTasks.length" class="tf3-task-grid">
           <TaskCard v-for="task in filteredTasks" :key="task.id" :task="task" @status-change="handleStatusChange" @priority-change="handlePriorityChange" />
         </div>
         <div v-else class="tf3-empty">За обраними фільтрами завдань не знайдено.</div>
       </section>
-    </main>
+    </div>
     <template #fixed><AppTabbar active="tasks" /></template>
   </f7-page>
 </template>
