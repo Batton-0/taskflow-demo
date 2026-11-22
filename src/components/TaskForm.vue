@@ -2,6 +2,7 @@
 import { reactive, ref, watch } from 'vue'
 const props = defineProps({
  task: { type: Object, default: null },
+ projects: { type: Array, required: true },
 })
 const emit = defineEmits(['save', 'cancel'])
 const form = reactive({
@@ -10,6 +11,7 @@ const form = reactive({
  status: 'todo',
  priority: 'medium',
  dueDate: '',
+ projectId: 'general',
 })
 const error = ref('')
 watch(
@@ -20,6 +22,7 @@ watch(
  form.status = task?.status ?? 'todo'
  form.priority = task?.priority ?? 'medium'
  form.dueDate = task?.dueDate ?? ''
+ form.projectId = task?.projectId ?? 'general'
  error.value = ''
  },
  { immediate: true },
@@ -39,13 +42,19 @@ function submit() {
  error.value = 'Дата повинна мати коректний формат.'
  return
  }
+ if (!props.projects.some((project) => project.id === form.projectId)) {
+ error.value = 'Оберіть проєкт зі списку.'
+ return
+ }
  error.value = ''
  emit('save', {
  id: props.task?.id ?? null,
  title,
  description,
- status: form.status, priority: form.priority,
+ status: form.status,
+ priority: form.priority,
  dueDate: form.dueDate,
+ projectId: form.projectId,
  })
 }
 </script>
@@ -59,7 +68,8 @@ function submit() {
  </label>
  <label>
  Опис
- <textarea v-model="form.description" rows="3" maxlength="500" placeholder="Деталі виконання"></textarea>
+ <textarea v-model="form.description" rows="3" maxlength="500" placeholder="Деталі
+виконання"></textarea>
  </label>
  <div class="tf5-form-grid">
  <label>
@@ -79,18 +89,26 @@ function submit() {
  </select>
  </label>
  </div>
+ <div class="tf5-form-grid">
+ <label>
+ Проєкт
+ <select v-model="form.projectId">
+ <option v-for="project in projects" :key="project.id" :value="project.id">
+ {{ project.title }}
+ </option>
+ </select>
+ </label>
  <label>
  Термін виконання
  <input v-model="form.dueDate" type="date" />
  </label>
+ </div>
  <p v-if="error" class="tf5-error" role="alert">{{ error }}</p>
  <div class="tf5-actions">
  <button type="submit" class="tf5-btn tf5-btn--primary">
  {{ task ? 'Зберегти зміни' : 'Створити завдання' }}
  </button>
- <button type="button" class="tf5-btn" @click="emit('cancel')">
- Скасувати
- </button>
+ <button type="button" class="tf5-btn" @click="emit('cancel')">Скасувати</button>
  </div>
  </form>
  </section>
