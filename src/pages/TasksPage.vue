@@ -7,11 +7,12 @@ import TaskForm from '../components/TaskForm.vue'
 import TaskListControls from '../components/TaskListControls.vue'
 import { useTasksStore } from '../store/tasks'
 import { useProjectsStore } from '../store/projects'
+import { persistenceState, retrySave } from '../services/persistence'
 import '../css/task-components.css'
 import '../css/task-list.css'
+import '../css/persistence.css'
 const taskStore = useTasksStore()
 const projectStore = useProjectsStore()
-// Для деструктуризації реактивного стану й getters використовуємо storeToRefs().
 const {
  tasks,
  visibleTasks,
@@ -22,7 +23,6 @@ const {
  sortOrder,
 } = storeToRefs(taskStore)
 const { projects } = storeToRefs(projectStore)
-// Стан відкриття форми локальний: іншим сторінкам він не потрібен.
 const showForm = ref(false)
 const editingId = ref(null)
 const newProjectTitle = ref('')
@@ -36,6 +36,12 @@ const projectStats = computed(() =>
  taskCount: tasks.value.filter((task) => task.projectId === project.id).length,
  })),
 )
+const saveMessage = computed(() => {
+ if (persistenceState.status === 'loading') return 'Завантаження локальних даних…'
+ if (persistenceState.status === 'saving') return 'Збереження змін у IndexedDB…'
+ if (persistenceState.status === 'saved') return 'Усі зміни збережено в цьому браузері.'
+ return persistenceState.error || 'Помилка локального збереження.'
+})
 function startCreate() {
  editingId.value = null
  showForm.value = true
@@ -78,9 +84,26 @@ function createProject() {
  <section class="tf3-hero">
  <div class="tf3-eyebrow">TASKFLOW / TASK MANAGER</div>
  <h1>Керування завданнями і проєктами</h1>
- <p>Pinia забезпечує спільний стан між вкладками без перезавантаження.</p>
+ <p>Pinia керує станом, IndexedDB зберігає завдання та проєкти локально.</p>
  <button type="button" class="tf5-btn tf5-btn--primary tf5-new" @click="startCreate">
  + Додати завдання
+ </button>
+ </section>
+ <section
+ class="tf7-persistence"
+ :class="`tf7-persistence--${persistenceState.status}`"
+ role="status"
+ aria-live="polite"
+ >
+ <strong>Локальне збереження</strong>
+ <span>{{ saveMessage }}</span>
+ <button
+ v-if="persistenceState.canRetry"
+ type="button"
+ class="tf5-btn"
+ @click="retrySave"
+ >
+ Повторити збереження
  </button>
  </section>
  <section class="tf5-panel tf6-project-panel" aria-label="Проєкти">
@@ -128,9 +151,7 @@ function createProject() {
  <div class="tf3-eyebrow">TASK LIST</div>
  <h2>Список завдань</h2>
  </div>
- <div class="tf3-counter">
- Показано: {{ visibleTasks.length }} із {{ tasks.length }}
- </div>
+ <div class="tf3-counter">Показано: {{ visibleTasks.length }} із {{ tasks.length }}</div>
  </div>
  <div v-if="visibleTasks.length" class="tf3-task-grid">
  <TaskCard
